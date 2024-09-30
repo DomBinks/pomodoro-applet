@@ -12,6 +12,9 @@ class TrayApp:
         self.count = 0
         self.dialog = None
         self.dialog_label = None
+        self.hours_button = None
+        self.minutes_button = None
+        self.seconds_button = None
 
         GLib.timeout_add(1000, self.increment_counter)
 
@@ -23,26 +26,38 @@ class TrayApp:
             self.dialog_label.set_text(str(self.count))
 
         return True
-    
-    def on_left_click(self, icon):
-        if not self.dialog:
-            self.dialog = Gtk.Dialog(
+
+    def create_dialog(self):
+        self.dialog = Gtk.Dialog(
                 title = "Timer",
                 transient_for = None,
                 flags = 0
-            )
-            self.dialog.add_button(Gtk.STOCK_OK, Gtk.ResponseType.OK)
-            box = self.dialog.get_content_area()
-            self.dialog_label = Gtk.Label(label = str(self.count))
-            box.add(self.dialog_label)
-            self.dialog.show_all()
-            
-            self.dialog.connect("response", self.on_dialog_close)
+                )
+        box = self.dialog.get_content_area()
 
+        self.dialog_label = Gtk.Label(label = str(self.count))
+        box.add(self.dialog_label)
+
+        self.hours_button = Gtk.SpinButton()
+        self.minutes_button = Gtk.SpinButton()
+        self.seconds_button = Gtk.SpinButton()
+        box.add(self.hours_button)
+        box.add(self.minutes_button)
+        box.add(self.seconds_button)
+
+        self.dialog.add_button(Gtk.STOCK_OK, Gtk.ResponseType.OK)
+    
     def on_dialog_close(self, dialog, response):
         self.dialog.destroy()
         self.dialog = None
 
+    def on_left_click(self, icon):
+        if not self.dialog:
+            self.create_dialog()
+            self.dialog.show_all()
+            self.dialog.connect("response", self.on_dialog_close)
+
+    
     def on_right_click(self, icon, button, time):
         # Create a menu
         menu = Gtk.Menu()
